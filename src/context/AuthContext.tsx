@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface User {
   name: string;
@@ -19,8 +25,8 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-const USERS_KEY = '@auth_users';
-const CURRENT_USER_KEY = '@auth_current_user';
+const USERS_KEY = "@auth_users";
+const CURRENT_USER_KEY = "@auth_current_user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -44,18 +50,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const users = await getUsers();
     const match = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      (u) =>
+        u.email.toLowerCase() === email.toLowerCase() &&
+        u.password === password,
     );
-    if (!match) throw new Error('Invalid email or password.');
-    const loggedIn: User = { name: match.name, email: match.email, createdAt: match.createdAt };
+    if (!match) throw new Error("Invalid email or password.");
+    const loggedIn: User = {
+      name: match.name,
+      email: match.email,
+      createdAt: match.createdAt,
+    };
     await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(loggedIn));
     setUser(loggedIn);
   };
 
   const signup = async (name: string, email: string, password: string) => {
     const users = await getUsers();
-    const exists = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (exists) throw new Error('An account with this email already exists.');
+    const exists = users.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase(),
+    );
+    if (exists) throw new Error("An account with this email already exists.");
     const createdAt = new Date().toISOString();
     const newUser: StoredUser = { name, email, password, createdAt };
     await AsyncStorage.setItem(USERS_KEY, JSON.stringify([...users, newUser]));
@@ -78,6 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
